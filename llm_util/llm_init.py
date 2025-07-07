@@ -21,7 +21,10 @@ class State(TypedDict):
 class AssistantInit:
     def __init__(self):
         # Initialize the LLM with the model name from environment variable
-        self.model_name = os.getenv("LLM_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
+        self.model_name = os.getenv(
+            "LLM_ID", 
+            "meta-llama/Meta-Llama-3-8B-Instruct"
+        )
         llm = HuggingFaceEndpoint(
                 model=self.model_name,
                 task="text-generation",
@@ -33,7 +36,10 @@ class AssistantInit:
             llm=llm
         )
         embeddings = HuggingFaceEmbeddings(
-            model_name=os.getenv("EMBEDDING_ID", "sentence-transformers/all-mpnet-base-v2")
+            model_name=os.getenv(
+                "EMBEDDING_ID", 
+                "sentence-transformers/all-mpnet-base-v2"
+            )
         )
         self.vectorstore = FAISS.load_local(
             os.getenv("VECTORSTORE_PATH", "./vectorstore"),
@@ -69,18 +75,26 @@ class AssistantInit:
         self.config = {"configurable": {"thread_id": "1"}}
 
     def retrieve(self, state: State):
-        retrieved_docs = self.vectorstore.similarity_search(state["question"], k=2)
+        retrieved_docs = self.vectorstore.similarity_search(
+            state["question"], 
+            k=2
+        )
         return {"context": retrieved_docs}
 
     def generate(self, state: State):
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
-        messages = self.prompt_template.invoke({"question": state["question"], "context": docs_content})
+        messages = self.prompt_template.invoke(
+            {"question": state["question"], "context": docs_content}
+        )
         response = self.chat_model.invoke(messages)
         return {"answer": response.content}
 
     def get_answer(self, query:str):
         """ Get the answer from the LLM based on the query."""
-        response = self.graph.invoke({"question": query}, config=self.config) # type: ignore
+        response = self.graph.invoke(
+            {"question": query}, # type: ignore
+            config=self.config # type: ignore
+        ) 
         return response
 
 assistant = AssistantInit()
