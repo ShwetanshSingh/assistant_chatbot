@@ -18,7 +18,7 @@ loader = DirectoryLoader(
 )
 documents = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
+    chunk_size=700,
     chunk_overlap=200,
 )
 docs = text_splitter.split_documents(documents)
