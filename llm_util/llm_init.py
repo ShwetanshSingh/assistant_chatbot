@@ -3,12 +3,21 @@ import json
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import HumanMessage, SystemMessage, trim_messages
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
+from langchain_core.documents import Document
+from langchain.vectorstores import FAISS
+from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFaceEmbeddings
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
+from typing_extensions import List, TypedDict
 from dotenv import load_dotenv
 
 load_dotenv("./config/.env")
+
+class State(TypedDict):
+    question: str
+    context: List[Document]
+    answer: str
+    sources: str
 
 class AssistantInit:
     def __init__(self):
@@ -23,6 +32,14 @@ class AssistantInit:
         )
         self.chat_model = ChatHuggingFace(
             llm=llm
+        )
+        embeddings = HuggingFaceEmbeddings(
+            model_name=os.getenv("EMBEDDING_ID", "sentence-transformers/all-mpnet-base-v2")
+        )
+        self.vectorstore = FAISS.load_local(
+            os.getenv("VECTORSTORE_PATH", "./vectorstore"),
+            embeddings,
+            allow_dangerous_deserialization=True
         )
         # Load the prompt from the JSON file
         with open(os.getenv("PROMPT_PATH", "./config/prompt.json"), "r") as f:
@@ -52,6 +69,13 @@ class AssistantInit:
         memory = MemorySaver()
         self.graph = graph_builder.compile(checkpointer=memory)
         self.config = {"configurable": {"thread_id": "1"}}
+
+    def retrieve(self, query: str):
+        retrieved_docs = self.vectorstore.similarity_search(query, k=3)
+        serialized = "\n\n".join(
+            (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}") for doc in retrieved_docs
+        )
+        return serialized # , retrieved_docs
 
     def call_model(self, state: MessagesState):
         """ Call the LLM with the current state messages."""
