@@ -17,7 +17,6 @@ class State(TypedDict):
     question: str
     context: List[Document]
     answer: str
-    sources: str
 
 class AssistantInit:
     def __init__(self):
@@ -45,14 +44,11 @@ class AssistantInit:
         with open(os.getenv("PROMPT_PATH", "./config/prompt.json"), "r") as f:
             prompt_data = json.load(f)
 
-        self.prompt_template = ChatPromptTemplate.from_messages(
+        self.prompt_template = ChatPromptTemplate(
             [
-                # (
-                #     "system",
-                #     prompt_data["prompt"]
-                # ),
                 SystemMessage(prompt_data["prompt"]),
-                MessagesPlaceholder(variable_name="messages")
+                ("human", "{question}"),
+                ("human", "{context}")
             ]
         )
         self.trimmer = trim_messages(
@@ -63,30 +59,28 @@ class AssistantInit:
             allow_partial=False,
             start_on="human"
         )
-        graph_builder = StateGraph(state_schema=MessagesState)
-        graph_builder.add_edge(START, "model")
-        graph_builder.add_node("model", self.call_model)
+        graph_builder = StateGraph(State)
+        graph_builder.add_node("retrieve", self.retrieve)
+        graph_builder.add_node("generate", self.generate)
+        graph_builder.add_edge("retrieve", "generate")
+        graph_builder.add_edge(START, "retrieve")
         memory = MemorySaver()
         self.graph = graph_builder.compile(checkpointer=memory)
         self.config = {"configurable": {"thread_id": "1"}}
 
-    def retrieve(self, query: str):
-        retrieved_docs = self.vectorstore.similarity_search(query, k=3)
-        serialized = "\n\n".join(
-            (f"Source: {doc.metadata}\n" f"Content: {doc.page_content}") for doc in retrieved_docs
-        )
-        return serialized # , retrieved_docs
+    def retrieve(self, state: State):
+        retrieved_docs = self.vectorstore.similarity_search(state["question"], k=2)
+        return {"context": retrieved_docs}
 
-    def call_model(self, state: MessagesState):
-        """ Call the LLM with the current state messages."""
-        trim_messages = self.trimmer.invoke(state["messages"])
-        prompt = self.prompt_template.invoke(trim_messages)
-        response = self.chat_model.invoke(prompt)
-        return {"messages": [response]}
+    def generate(self, state: State):
+        docs_content = "\n\n".join(doc.page_content for doc in state["context"])
+        messages = self.prompt_template.invoke({"question": state["question"], "context": docs_content})
+        response = self.chat_model.invoke(messages)
+        return {"answer": response.content}
 
     def get_answer(self, query:str):
         """ Get the answer from the LLM based on the query."""
-        response = self.graph.invoke({"messages": [HumanMessage(query)]}, config=self.config) # type: ignore
-        return response["messages"][-1]
+        response = self.graph.invoke({"question": query}, config=self.config) # type: ignore
+        return response
 
 assistant = AssistantInit()

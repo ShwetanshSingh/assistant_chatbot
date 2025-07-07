@@ -5,7 +5,11 @@ while True:
     if query.lower() == "exit":
         break
     try:
-        answer = assistant.get_answer(query)
-        answer.pretty_print()
+        response = assistant.get_answer(query)
+        answer = response["answer"]
+        source = response["context"]
+        source_list = [src.metadata["source"] for src in source]
+        print(f"Answer: {answer}")
+        print(f"Sources: {source_list}")
     except Exception as e:
         print(f"An error occurred: {e}")
