@@ -1,7 +1,7 @@
 from llm_util.llm_init import assistant
 
 while True:
-    query = input("=>Enter your query: ")
+    query = input("\n=>Enter your query: ")
     if query.lower() == "exit":
         break
     try:
