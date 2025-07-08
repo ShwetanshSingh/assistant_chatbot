@@ -8,7 +8,8 @@ from langchain.vectorstores import FAISS
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFaceEmbeddings
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, MessagesState, StateGraph
-from typing_extensions import List, TypedDict
+from typing_extensions import List, TypedDict, Optional, Annotated
+from operator import add
 from dotenv import load_dotenv
 
 load_dotenv("./config/.env")
@@ -17,6 +18,7 @@ class State(TypedDict):
     question: str
     context: List[Document]
     answer: str
+    history: Annotated[Optional[List[str]], add]
 
 class AssistantInit:
     def __init__(self):
@@ -53,12 +55,13 @@ class AssistantInit:
         self.prompt_template = ChatPromptTemplate(
             [
                 SystemMessage(prompt_data["prompt"]),
+                ("human", "{history}"),
                 ("human", "{question}"),
                 ("human", "{context}")
             ]
         )
         self.trimmer = trim_messages(
-            max_tokens=400,
+            max_tokens=700,
             strategy="last",
             token_counter=self.chat_model,
             include_system=True,
@@ -84,10 +87,22 @@ class AssistantInit:
     def generate(self, state: State):
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
         messages = self.prompt_template.invoke(
-            {"question": state["question"], "context": docs_content}
+            {
+                "question": state["question"], 
+                "context": docs_content,
+                "history": "\n\n".join(
+                    chat for chat in (state.get("history") or [])
+                )
+            }
         )
         response = self.chat_model.invoke(messages)
-        return {"answer": response.content}
+        return {
+            "answer": response.content, 
+            "history": [
+                "Human: " + state["question"],
+                "Assistant: " + response.content # type: ignore
+            ]
+        }
 
     def get_answer(self, query:str):
         """ Get the answer from the LLM based on the query."""
