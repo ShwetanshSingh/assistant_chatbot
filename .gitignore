@@ -211,3 +211,7 @@ documents/
 
 # Local vectorstore
 vectorstore/
+
+# Conversation log file
+output.txt
+
