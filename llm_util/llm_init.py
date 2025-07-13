@@ -64,7 +64,6 @@ class AssistantInit:
             max_tokens=700,
             strategy="last",
             token_counter=self.chat_model,
-            include_system=True,
             allow_partial=False,
             start_on="human"
         )
@@ -86,12 +85,16 @@ class AssistantInit:
 
     def generate(self, state: State):
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
+        # trim history
+        history = state.get("history", [])
+        self.trimmer.invoke(history)
+
         messages = self.prompt_template.invoke(
             {
                 "question": state["question"], 
                 "context": docs_content,
                 "history": "\n\n".join(
-                    chat for chat in (state.get("history") or [])
+                    chat for chat in (history or [])
                 )
             }
         )
