@@ -25,7 +25,7 @@ def log_message(component: str, message: str):
 class Chatbot():
     def __init__(
             self, 
-            llm_model_repo: str ="HuggingFaceH4/zephyr-7b-beta", # meta-llama/Meta-Llama-3-8B-Instruct
+            llm_model_repo: str ="meta-llama/Llama-3.3-70B-Instruct", # meta-llama/Meta-Llama-3-8B-Instruct | meta-llama/Llama-3.3-70B-Instruct | HuggingFaceH4/zephyr-7b-beta
             embeddings_model_repo: str ="sentence-transformers/all-mpnet-base-v2",
             document_name: str ="the_wonderful_wizard_of_oz.txt"
         ):
@@ -37,7 +37,10 @@ class Chatbot():
                 task="text-generation",
                 max_new_tokens=512,
                 do_sample=False,
-                repetition_penalty=1.03
+                repetition_penalty=1.03,
+                provider="cerebras"                             # setting provider="cerebras"
+                                                                # because featherless-ai
+                                                                # is not supported
             )
         )
         log_message("LLM", f"{llm_model_repo} initialized")
