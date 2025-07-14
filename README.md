@@ -10,6 +10,5 @@ To run this project,
     - `pip install -r requirements-2.txt`
 - Run `python app.py` 
 - You will see a link from Gradio in the terminal. `Ctrl+click` the link to open the application
-- The current data for RAG is `The Wizard of Oz`. You can submit your questions about the story, and the chatbot will provide responses with context gained from the document.
-
-
+- The current data (in `./data`) for RAG is `The Wizard of Oz`. You can submit your questions about the story, and the chatbot will provide responses with context gained from the document.
+- Alternatively, you can put your own `.txt` document in `./data` folder and run the app over it.
