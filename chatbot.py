@@ -1,3 +1,5 @@
+import os
+
 from langchain import hub
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint, HuggingFaceEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -38,10 +40,9 @@ class Chatbot():
                 max_new_tokens=512,
                 do_sample=False,
                 repetition_penalty=1.03,
-                provider="cerebras"                             # setting provider="cerebras"
-                                                                # because featherless-ai
-                                                                # is not supported
-            )
+                provider="cerebras",
+                huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN")
+            )   # type: ignore
         )
         log_message("LLM", f"{llm_model_repo} initialized")
         # Instantiation of embeddings model
