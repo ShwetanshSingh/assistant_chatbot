@@ -2,9 +2,8 @@
 Python version = 3.12.3
 
 To run this project, 
-- Switch to `codespaces-compatible-main` branch 
-- Start a codespace from the `code` button
-- Wait for codespace to finish setting up
+- Start a Codespace from the `code` button
+- Wait for Codespace to finish setting up
 - Run the following commands in terminal:
     - `pip install -r requirements-1.txt`
     - `pip install -r requirements-2.txt`
