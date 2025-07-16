@@ -1,4 +1,4 @@
-from llm_util.llm_init import assistant
+from utils.llm_init import assistant
 
 print("Graph structure:")
 assistant.graph.get_graph().print_ascii()

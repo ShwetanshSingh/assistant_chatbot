@@ -1,4 +1,4 @@
-from llm_util.llm_init import assistant
+from utils.llm_init import assistant
 
 while True:
     query = input("\n=>Enter your query: ")
