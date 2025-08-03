@@ -215,3 +215,5 @@ vectorstore/
 # Conversation log file
 output.txt
 
+# debug file
+assistant_debug.py
