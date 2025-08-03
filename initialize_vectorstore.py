@@ -12,7 +12,7 @@ embedding_model = HuggingFaceEmbeddings(
 )
 loader = DirectoryLoader(
     os.getenv("RAG_DOCUMENTS_PATH", "./documents"),
-    glob="*.html",
+    glob="*",
     use_multithreading=True,
     show_progress=True,
 )
