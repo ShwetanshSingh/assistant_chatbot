@@ -14,7 +14,7 @@ loader = DirectoryLoader(
     os.getenv("RAG_DOCUMENTS_PATH", "./documents"),
     glob="*.html",
     use_multithreading=True,
-    show_progress=True
+    show_progress=True,
 )
 documents = loader.load()
 text_splitter = RecursiveCharacterTextSplitter(
