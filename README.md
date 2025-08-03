@@ -10,4 +10,5 @@ To run this project,
 - Put your files for RAG in `documents/` folder
 - After packages are installed, run `uv run initialize_vectorstore.py`, to create vectorstore database
 - Run `uv run app.py` to start app
+- Ask questions on your documents and files
 - When you want to close the app, type 'exit' in question
