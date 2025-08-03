@@ -76,7 +76,32 @@ class AssistantInit:
         self.graph = graph_builder.compile(checkpointer=memory)
         self.config = {"configurable": {"thread_id": "1"}}
 
-    def retrieve(self, state: State):
+    def retrieve(self, state: State) -> dict[str, List[Document]]:
+        """Retrieves relevant documents from the vector store based on the input question.
+    
+        This function performs a similarity search in the FAISS vector store using the question
+        provided in the state. It returns the top 2 most semantically similar documents that can
+        be used as context for answering the question.
+
+        Args:
+            state (State): A TypedDict containing:
+                - question (str): The user's input question
+                - context (List[Document]): Previous context (if any)
+                - answer (str): Previous answer (if any)
+                - history (Optional[List[str]]): Conversation history
+
+        Returns:
+            dict[str, List[Document]]: A dictionary containing:
+                - context: List of retrieved Document objects, each containing:
+                    - page_content: The actual text content
+                    - metadata: Associated metadata like source, page numbers, etc.
+
+        Example:
+            >>> state = {"question": "What is Article 370?", "context": [], "answer": "", "history": None}
+            >>> result = assistant.retrieve(state)
+            >>> # Returns {"context": [Document1, Document2]} where Document1 and Document2 
+            >>> # are the most relevant documents from the vector store
+        """
         retrieved_docs = self.vectorstore.similarity_search(
             state["question"], 
             k=2
