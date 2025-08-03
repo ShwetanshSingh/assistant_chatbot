@@ -1,8 +1,8 @@
 import os
 import json
 
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, SystemMessage, trim_messages
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage, trim_messages
 from langchain_core.documents import Document
 from langchain.vectorstores import FAISS
 from langchain_huggingface import (
@@ -11,7 +11,7 @@ from langchain_huggingface import (
     HuggingFaceEmbeddings,
 )
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import START, MessagesState, StateGraph
+from langgraph.graph import START, StateGraph
 from typing_extensions import List, TypedDict, Optional, Annotated
 from operator import add
 from dotenv import load_dotenv
