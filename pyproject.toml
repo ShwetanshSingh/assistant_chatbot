@@ -132,8 +132,6 @@ dependencies = [
     "python-json-logger==3.3.0",
     "python-magic==0.4.27",
     "python-oxmsg==0.0.2",
-    "pywin32==310",
-    "pywinpty==2.0.15",
     "pyyaml==6.0.2",
     "pyzmq==27.0.0",
     "rapidfuzz==3.13.0",
