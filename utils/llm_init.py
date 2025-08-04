@@ -1,3 +1,21 @@
+"""RAG-based question answering system with conversation history.
+
+This module implements a Retrieval Augmented Generation (RAG) system that combines
+document retrieval with language model generation to provide accurate, contextual
+answers. It uses FAISS for document similarity search, HuggingFace models for
+text generation, and LangGraph for workflow orchestration.
+
+Main Components:
+    - AssistantInit: Main class implementing the RAG pipeline
+    - State: TypedDict defining the workflow state structure
+
+Environment Variables:
+    - LLM_ID: HuggingFace model ID for text generation
+    - EMBEDDING_ID: Model ID for text embeddings
+    - VECTORSTORE_PATH: Path to FAISS vector store
+    - PROMPT_PATH: Path to system prompt configuration
+"""
+
 import os
 import json
 
@@ -12,7 +30,7 @@ from langchain_huggingface import (
 )
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, StateGraph
-from typing_extensions import List, TypedDict, Optional, Annotated
+from typing_extensions import List, TypedDict, Optional, Annotated, Union
 from operator import add
 from dotenv import load_dotenv
 
@@ -20,6 +38,19 @@ load_dotenv("./config/.env")
 
 
 class State(TypedDict):
+    """Represents the state of the RAG (Retrieval Augmented Generation) pipeline.
+
+    This TypedDict defines the structure of the state object that flows through the
+    LangGraph workflow. It contains the user's question, retrieved context documents,
+    generated answer, and conversation history.
+
+    Attributes:
+        question (str): The current user question or query
+        context (List[Document]): List of retrieved documents for context
+        answer (str): The generated answer from the LLM
+        history (Annotated[Optional[List[str]], add]): Conversation history with
+            accumulator annotation for maintaining chat history across turns
+    """
     question: str
     context: List[Document]
     answer: str
@@ -27,6 +58,24 @@ class State(TypedDict):
 
 
 class AssistantInit:
+    """A RAG (Retrieval Augmented Generation) based assistant using LangGraph workflow.
+
+    This class implements a question-answering system that combines document retrieval
+    with language model generation. It uses FAISS for similarity search, HuggingFace
+    for embeddings and text generation, and LangGraph for workflow management.
+
+    Key Components:
+        - FAISS vectorstore for efficient similarity search
+        - HuggingFace model for text generation
+        - LangGraph for orchestrating the RAG workflow
+        - Conversation history management with token-based trimming
+        - Environment-based configuration for models and paths
+
+    Example:
+        >>> assistant = AssistantInit()
+        >>> response = assistant.get_answer("What is Article 370?")
+        >>> print(response["answer"])
+    """
     def __init__(self):
         # Initialize the LLM with the model name from environment variable
         self.model_name = os.getenv("LLM_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
@@ -105,7 +154,25 @@ class AssistantInit:
         retrieved_docs = self.vectorstore.similarity_search(state["question"], k=2)
         return {"context": retrieved_docs}
 
-    def generate(self, state: State):
+    def generate(self, state: State) -> dict[str, Union[str, List[str]]]:
+        """Generates an AI response using retrieved context and conversation history.
+
+        This function combines retrieved documents with the user's question and conversation
+        history to generate a contextually relevant response. It manages conversation history
+        length using a token-based trimmer.
+
+        Args:
+            state (State): A TypedDict containing:
+                - question (str): The user's question
+                - context (List[Document]): Retrieved documents for context
+                - answer (str): Previous answer if any
+                - history (Optional[List[str]]): Previous conversation history
+
+        Returns:
+            dict: A dictionary containing:
+                - answer (str): The AI-generated response
+                - history (List[str]): Updated conversation history with new Q&A pair
+        """
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
         # trim history
         history = state.get("history", [])
@@ -127,8 +194,26 @@ class AssistantInit:
             ],
         }
 
-    def get_answer(self, query: str):
-        """Get the answer from the LLM based on the query."""
+    def get_answer(self, query: str) -> dict[str, Union[str, List[str]]]:
+        """Processes a user query through the RAG pipeline to generate an answer.
+
+        This function is the main entry point for question answering. It coordinates the
+        document retrieval and answer generation process through a LangGraph workflow.
+        The conversation history is automatically managed through the graph's checkpointer.
+
+        Args:
+            query (str): The user's question or prompt
+
+        Returns:
+            dict: A dictionary containing:
+                - answer (str): The AI-generated response
+                - history (List[str]): The updated conversation history
+                - context (List[Document]): The retrieved documents used for the answer
+
+        Example:
+            >>> response = assistant.get_answer("What are the fundamental rights in India?")
+            >>> print(response["answer"])  # Prints the AI's response
+        """
         response = self.graph.invoke(
             {"question": query},  # type: ignore
             config=self.config,  # type: ignore
