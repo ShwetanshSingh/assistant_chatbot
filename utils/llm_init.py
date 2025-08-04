@@ -51,6 +51,7 @@ class State(TypedDict):
         history (Annotated[Optional[List[str]], add]): Conversation history with
             accumulator annotation for maintaining chat history across turns
     """
+
     question: str
     context: List[Document]
     answer: str
@@ -76,6 +77,7 @@ class AssistantInit:
         >>> response = assistant.get_answer("What is Article 370?")
         >>> print(response["answer"])
     """
+
     def __init__(self):
         # Initialize the LLM with the model name from environment variable
         self.model_name = os.getenv("LLM_ID", "meta-llama/Meta-Llama-3-8B-Instruct")
@@ -127,7 +129,7 @@ class AssistantInit:
 
     def retrieve(self, state: State) -> dict[str, List[Document]]:
         """Retrieves relevant documents from the vector store based on the input question.
-    
+
         This function performs a similarity search in the FAISS vector store using the question
         provided in the state. It returns the top 2 most semantically similar documents that can
         be used as context for answering the question.
@@ -148,7 +150,7 @@ class AssistantInit:
         Example:
             >>> state = {"question": "What is Article 370?", "context": [], "answer": "", "history": None}
             >>> result = assistant.retrieve(state)
-            >>> # Returns {"context": [Document1, Document2]} where Document1 and Document2 
+            >>> # Returns {"context": [Document1, Document2]} where Document1 and Document2
             >>> # are the most relevant documents from the vector store
         """
         retrieved_docs = self.vectorstore.similarity_search(state["question"], k=2)
