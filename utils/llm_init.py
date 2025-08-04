@@ -6,14 +6,14 @@ answers. It uses FAISS for document similarity search, HuggingFace models for
 text generation, and LangGraph for workflow orchestration.
 
 Main Components:
-    - AssistantInit: Main class implementing the RAG pipeline
-    - State: TypedDict defining the workflow state structure
+- AssistantInit: Main class implementing the RAG pipeline
+- State: TypedDict defining the workflow state structure
 
 Environment Variables:
-    - LLM_ID: HuggingFace model ID for text generation
-    - EMBEDDING_ID: Model ID for text embeddings
-    - VECTORSTORE_PATH: Path to FAISS vector store
-    - PROMPT_PATH: Path to system prompt configuration
+- LLM_ID: HuggingFace model ID for text generation
+- EMBEDDING_ID: Model ID for text embeddings
+- VECTORSTORE_PATH: Path to FAISS vector store
+- PROMPT_PATH: Path to system prompt configuration
 """
 
 import os
@@ -45,10 +45,10 @@ class State(TypedDict):
     generated answer, and conversation history.
 
     Attributes:
-        question (str): The current user question or query
-        context (List[Document]): List of retrieved documents for context
-        answer (str): The generated answer from the LLM
-        history (Annotated[Optional[List[str]], add]): Conversation history with
+    - question (str): The current user question or query
+    - context (List[Document]): List of retrieved documents for context
+    - answer (str): The generated answer from the LLM
+    - history (Annotated[Optional[List[str]], add]): Conversation history with
             accumulator annotation for maintaining chat history across turns
     """
 
@@ -66,16 +66,16 @@ class AssistantInit:
     for embeddings and text generation, and LangGraph for workflow management.
 
     Key Components:
-        - FAISS vectorstore for efficient similarity search
-        - HuggingFace model for text generation
-        - LangGraph for orchestrating the RAG workflow
-        - Conversation history management with token-based trimming
-        - Environment-based configuration for models and paths
+    - FAISS vectorstore for efficient similarity search
+    - HuggingFace model for text generation
+    - LangGraph for orchestrating the RAG workflow
+    - Conversation history management with token-based trimming
+    - Environment-based configuration for models and paths
 
     Example:
-        >>> assistant = AssistantInit()
-        >>> response = assistant.get_answer("What is Article 370?")
-        >>> print(response["answer"])
+    > assistant = AssistantInit()  
+    > response = assistant.get_answer("What is Article 370?")  
+    > print(response["answer"])  
     """
 
     def __init__(self):
@@ -134,24 +134,26 @@ class AssistantInit:
         provided in the state. It returns the top 2 most semantically similar documents that can
         be used as context for answering the question.
 
-        Args:
-            state (State): A TypedDict containing:
-                - question (str): The user's input question
-                - context (List[Document]): Previous context (if any)
-                - answer (str): Previous answer (if any)
-                - history (Optional[List[str]]): Conversation history
+        Args:  
+        - state (State): A TypedDict containing:
+            - question (str): The user's input question
+            - context (List[Document]): Previous context (if any)
+            - answer (str): Previous answer (if any)
+            - history (Optional[List[str]]): Conversation history
 
         Returns:
-            dict[str, List[Document]]: A dictionary containing:
-                - context: List of retrieved Document objects, each containing:
-                    - page_content: The actual text content
-                    - metadata: Associated metadata like source, page numbers, etc.
+        - dict[str, List[Document]]: A dictionary containing:
+            - context: List of retrieved Document objects, each containing:
+                - page_content: The actual text content
+                - metadata: Associated metadata like source, page numbers, etc.
 
         Example:
-            >>> state = {"question": "What is Article 370?", "context": [], "answer": "", "history": None}
-            >>> result = assistant.retrieve(state)
-            >>> # Returns {"context": [Document1, Document2]} where Document1 and Document2
-            >>> # are the most relevant documents from the vector store
+        ```Python
+        state = {"question": "What is Article 370?", "context": [], "answer": "", "history": None}  
+        result = assistant.retrieve(state)  
+        # Returns {"context": [Document1, Document2]} where Document1 and Document2  
+        # are the most relevant documents from the vector store  
+        ```
         """
         retrieved_docs = self.vectorstore.similarity_search(state["question"], k=2)
         return {"context": retrieved_docs}
@@ -164,16 +166,16 @@ class AssistantInit:
         length using a token-based trimmer.
 
         Args:
-            state (State): A TypedDict containing:
-                - question (str): The user's question
-                - context (List[Document]): Retrieved documents for context
-                - answer (str): Previous answer if any
-                - history (Optional[List[str]]): Previous conversation history
+        - state (State): A TypedDict containing:
+            - question (str): The user's question
+            - context (List[Document]): Retrieved documents for context
+            - answer (str): Previous answer if any
+            - history (Optional[List[str]]): Previous conversation history
 
         Returns:
-            dict: A dictionary containing:
-                - answer (str): The AI-generated response
-                - history (List[str]): Updated conversation history with new Q&A pair
+        - dict: A dictionary containing:
+            - answer (str): The AI-generated response
+            - history (List[str]): Updated conversation history with new Q&A pair
         """
         docs_content = "\n\n".join(doc.page_content for doc in state["context"])
         # trim history
@@ -204,17 +206,19 @@ class AssistantInit:
         The conversation history is automatically managed through the graph's checkpointer.
 
         Args:
-            query (str): The user's question or prompt
+        - query (str): The user's question or prompt
 
         Returns:
-            dict: A dictionary containing:
-                - answer (str): The AI-generated response
-                - history (List[str]): The updated conversation history
-                - context (List[Document]): The retrieved documents used for the answer
+        - dict: A dictionary containing:
+            - answer (str): The AI-generated response
+            - history (List[str]): The updated conversation history
+            - context (List[Document]): The retrieved documents used for the answer
 
         Example:
-            >>> response = assistant.get_answer("What are the fundamental rights in India?")
-            >>> print(response["answer"])  # Prints the AI's response
+        ```Python
+        response = assistant.get_answer("What are the fundamental rights in India?")
+        print(response["answer"])  # Prints the AI's response
+        ```
         """
         response = self.graph.invoke(
             {"question": query},  # type: ignore
