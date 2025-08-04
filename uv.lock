@@ -1510,6 +1510,7 @@ dependencies = [
     { name = "packaging" },
     { name = "pandocfilters" },
     { name = "parso" },
+    { name = "pdoc" },
     { name = "pillow" },
     { name = "platformdirs" },
     { name = "prometheus-client" },
@@ -1690,6 +1691,7 @@ requires-dist = [
     { name = "packaging", specifier = "==24.2" },
     { name = "pandocfilters", specifier = "==1.5.1" },
     { name = "parso", specifier = "==0.8.4" },
+    { name = "pdoc", specifier = ">=15.0.4" },
     { name = "pillow", specifier = "==11.3.0" },
     { name = "platformdirs", specifier = "==4.3.8" },
     { name = "prometheus-client", specifier = "==0.22.1" },
@@ -2246,6 +2248,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/66/94/68e2e17afaa9169cf6412ab0f28623903be73d1b32e208d9e8e541bb086d/parso-0.8.4.tar.gz", hash = "sha256:eb3a7b58240fb99099a345571deecc0f9540ea5f4dd2fe14c2a99d6b281ab92d", size = 400609, upload-time = "2024-04-05T09:43:55.897Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c6/ac/dac4a63f978e4dcb3c6d3a78c4d8e0192a113d288502a1216950c41b1027/parso-0.8.4-py2.py3-none-any.whl", hash = "sha256:a418670a20291dacd2dddc80c377c5c3791378ee1e8d12bffc35420643d43f18", size = 103650, upload-time = "2024-04-05T09:43:53.299Z" },
+]
+
+[[package]]
+name = "pdoc"
+version = "15.0.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jinja2" },
+    { name = "markupsafe" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/91/5c/e94c1ab4aa2f8a9cc29d81e1c513c6216946cb3a90957ef7115b12e9363d/pdoc-15.0.4.tar.gz", hash = "sha256:cf9680f10f5b4863381f44ef084b1903f8f356acb0d4cc6b64576ba9fb712c82", size = 155678, upload-time = "2025-06-04T17:05:49.639Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/2c/87250ac73ca8730b2c4e0185b573585f0b42e09562132e6c29d00b3a9bb9/pdoc-15.0.4-py3-none-any.whl", hash = "sha256:f9028e85e7bb8475b054e69bde1f6d26fc4693d25d9fa1b1ce9009bec7f7a5c4", size = 145978, upload-time = "2025-06-04T17:05:48.473Z" },
 ]
 
 [[package]]
